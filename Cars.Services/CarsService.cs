@@ -40,15 +40,19 @@ namespace Cars.Services
             var manufacturers = _repo.GetManufacturers();
             var cars = _repo.GetCars();
 
-            return (from manufacturerData in manufacturers
-                    let carModels = cars.Where(c => c.ManufacturerId == manufacturerData.Id)
-                    select new ManufacturerWithCars
+            return (manufacturers
+                    .Select(manufacturerData => new
                     {
-                        Id = manufacturerData.Id,
-                        Name = manufacturerData.Name,
-                        Country = manufacturerData.Country,
-                        AvailableCars = carModels
-                    }).Cast<IManufacturerWithCars>()
+                        manufacturerData,
+                        carModels = cars.Where(c => c.ManufacturerId == manufacturerData.Id)
+                    })
+                    .Select(@t => new ManufacturerWithCars
+                    {
+                        Id = @t.manufacturerData.Id,
+                        Name = @t.manufacturerData.Name,
+                        Country = @t.manufacturerData.Country,
+                        AvailableCars = @t.carModels
+                    })).Cast<IManufacturerWithCars>()
                 .ToList();
         }
 
